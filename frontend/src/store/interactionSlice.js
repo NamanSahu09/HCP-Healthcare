@@ -1,26 +1,40 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    hcp_name: '',
-    interaction_date: '',
-    interaction_type: 'Meeting',
-    topics_discussed: '',
-    sentiment: 'Neutral',
+  hcpName: '',
+  interactionType: 'Meeting',
+  date: '',
+  time: '',
+  attendees: '',
+  topics: '',
+  materialsShared: '',
+  samplesDistributed: '',
+  sentiment: 'Neutral',
+  outcomes: '',
+  followUpActions: '',
 };
 
 export const interactionSlice = createSlice({
-    name: 'interaction',
-    initialState,
-    reducers: {
-        updateField: (state, action) => {
-            const { field, value } = action.payload;
-            state[field] = value;
-        },
-        resetForm: (state) => {
-            return initialState;
-        },
+  name: 'interaction',
+  initialState,
+  reducers: {
+    updateFormContent: (state, action) => {
+      const d = action.payload || {};
+      state.hcpName = d.hcpName ?? state.hcpName;
+      state.interactionType = d.interactionType ?? state.interactionType;
+      state.date = d.date ?? state.date;
+      state.time = d.time ?? state.time;
+      state.attendees = d.attendees ?? state.attendees;
+      state.topics = d.topics ?? state.topics;
+      state.materialsShared = d.materialsShared ?? state.materialsShared;
+      state.samplesDistributed = d.samplesDistributed ?? state.samplesDistributed;
+      state.sentiment = d.sentiment ?? state.sentiment;
+      state.outcomes = d.outcomes ?? state.outcomes;
+      state.followUpActions = d.followUpActions ?? state.followUpActions;
     },
+    resetForm: () => initialState,
+  },
 });
 
-export const { updateField, resetForm } = interactionSlice.actions;
+export const { updateFormContent, resetForm } = interactionSlice.actions;
 export default interactionSlice.reducer;
