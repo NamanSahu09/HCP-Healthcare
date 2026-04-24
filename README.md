@@ -1,67 +1,98 @@
-# 🏥 AI-Powered HCP Interaction Logging System
+# AI-First CRM HCP Module (Agentic Workflow)
 
-An intelligent CRM solution for Healthcare Professionals (HCP) interaction logging, designed for Pharmaceutical Representatives. This system replaces tedious manual form-filling with an AI-driven chat interface that extracts and logs data automatically using an agentic workflow.
+An intelligent, AI-driven Customer Relationship Management (CRM) module designed specifically for Life Sciences and Pharmaceutical Sales Representatives to manage interactions with Healthcare Professionals (HCPs). 
 
-## 🌟 Key Features
-- **Exclusive AI Control**: The interaction form is locked (Read-Only). Data can only be populated via the AI Assistant, ensuring data consistency and reducing manual effort.
-- **Agentic Workflow**: Built using **LangGraph**, the system doesn't just chat; it decides which tool to call based on user intent.
-- **Natural Language Processing**: Extracts HCP names, dates, sentiment, and discussion points from raw chat text.
-- **Real-time Sync**: Integration between FastAPI and React via Redux for seamless state updates.
+Instead of manual data entry, this application uses a conversational AI Agent (powered by LangGraph and Groq/Gemini) to seamlessly extract, format, and log interaction data into a strict PostgreSQL database while maintaining a read-only, visually synchronized React frontend.
 
-## 🛠️ Tech Stack
-- **Frontend**: React.js, Redux Toolkit (State Management), Axios
-- **Backend**: FastAPI (Python), Uvicorn
-- **AI Orchestration**: LangGraph, LangChain
-- **LLM**: Groq (Llama-3.1-8b-instant)
-- **Database**: PostgreSQL (SQLAlchemy ORM)
+## Key Features
 
-## ⚙️ System Architecture
-`User Input` $\rightarrow$ `React Frontend` $\rightarrow$ `FastAPI Backend` $\rightarrow$ `LangGraph Agent` $\rightarrow$ `LLM (Groq)` $\rightarrow$ `Custom Tools` $\rightarrow$ `PostgreSQL`
+- **Agentic Workflow:** Utilizes LangGraph to intelligently route user prompts to appropriate Python tools instead of relying on linear scripts.
+- **Split-Screen UI:** A modern, read-only interaction form on the left that auto-updates in real-time based on the AI Sales Copilot chat on the right.
+- **Multi-LLM Resilience:** Primary generation handled by `gemma2-9b-it` (via Groq) for lightning-fast entity extraction, with an automatic fallback mechanism to `gemini-1.5-flash` to prevent rate-limit failures.
+- **Redux State Management:** Strict unidirectional data flow ensuring the UI perfectly mirrors the AI's extracted data payload.
 
-## 🧰 Implemented AI Tools (LangGraph)
-The system utilizes 5 specialized tools to handle CRM operations:
-1. **Log Interaction**: Extracts and saves HCP details, date, and notes into the database.
-2. **Edit Interaction**: Modifies existing interaction records based on specific field requests.
-3. **Suggest Follow-up**: Analyzes interaction notes and suggests the next best meeting date.
-4. **Generate Summary Report**: Aggregates weekly interaction data into a concise report.
-5. **Sentiment Analysis**: Detects the tone of the HCP (Positive/Negative/Neutral) from the discussion.
+## 🛠️ Technology Stack
 
-## 🚀 Installation & Setup
+**Frontend:**
+- React.js
+- Redux Toolkit (State Management)
+- Tailwind CSS & inline styling for modern UI
+- Axios & Lucide-React Icons
+
+**Backend:**
+- Python 3.10+
+- FastAPI (REST API)
+- SQLAlchemy (ORM for PostgreSQL)
+- LangGraph & LangChain (Agentic Framework)
+- LLMs: ChatGroq (`gemma2-9b-it`), Google GenAI (`gemini-1.5-flash`)
+
+## 🧠 Role of the LangGraph Agent
+
+The LangGraph agent acts as the central orchestrator for the CRM. Instead of basic text generation, it operates as a state-machine that processes the Medical Representative's natural language input, understands the intent, maintains conversational memory, and decides *which* specific database tool to trigger. It bridges the gap between unstructured conversational data and a highly structured SQL relational database.
+
+### The 5 LangGraph Tools Implemented:
+
+1. **`log_interaction` (Mandatory):** Parses raw conversational inputs to extract core entities (HCP Name, Date, Time, Topics, Sentiment, Materials). It validates this data and executes the SQL `INSERT` to create a new CRM record, returning a structured JSON to instantly update the React Redux state.
+2. **`edit_interaction` (Mandatory):** Accepts contextual updates (e.g., *"Actually, change the sentiment to neutral"*). It targets specific columns in the SQL database for an `UPDATE` without overwriting existing accurate data in other fields.
+3. **`suggest_followup`:** Analyzes the interaction notes to intelligently calculate and suggest an optimal follow-up date and strategy for the next HCP visit.
+4. **`analyze_sentiment`:** Acts as an evaluator that reads direct quotes from the doctor to classify their reaction as Positive, Negative, or Neutral, aiding in compliance and sales strategy.
+5. **`generate_summary_report`:** Connects to the PostgreSQL database to retrieve, compile, and summarize all past logged interactions into a concise weekly report for the regional manager.
+
+## ⚙️ Setup & Installation
+
+### Prerequisites
+- Node.js (v16+)
+- Python (v3.9+)
+- PostgreSQL Database running locally or via cloud.
 
 ### 1. Backend Setup
-```bash```
+Navigate to the backend directory:
+```bash
 cd backend
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
-
-# Install dependencies
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
+Create a .env file in the backend root directory:
 
-# Set up environment variables in .env
-# DATABASE_URL=postgresql://postgres:password@localhost:5432/hcp_db
-# GROQ_API_KEY=your_api_key_here
+Code snippet
+DATABASE_URL=postgresql://user:password@localhost:5432/hcp_db
+GROQ_API_KEY_1=your_groq_api_key_1
+GROQ_API_KEY_2=your_groq_api_key_2
+GEMINI_API_KEY=your_gemini_api_key
+Run the FastAPI server:
 
-# Start server
-python3 -m uvicorn app.main:app --reload
-
-
-
+Bash
+uvicorn app.main:app --reload --port 8000
 2. Frontend Setup
+Navigate to the frontend directory:
+
+Bash
 cd frontend
 npm install
 npm start
-🧪 How to Test
-Open the app at http://localhost:3000.
-Notice that the form is locked (Read-only).
-In the chat, type: "I met Dr. Smith today, the meeting was great and we discussed product efficiency. Please log this."
-Observe the form fields automatically populating via the AI Agent.
-📊 Task 2: Quality Management System (QMS)
-As part of the Life Science Supply Chain domain, this project considers the QMS flow:
+The application will be available at http://localhost:3000.
 
-Deviation Management: Detecting quality failures in drug ingredients.
-Investigation: QA Officers analyzing the root cause.
-CAPA: Implementing Corrective and Preventive Actions to ensure compliance.
-
-
-
+📂 Project Structure
+Plaintext
+ai-crm-hcp/
+├── backend/
+│   ├── app/
+│   │   ├── main.py          # FastAPI endpoints
+│   │   ├── agent.py         # LangGraph workflow & Fallback logic
+│   │   ├── tools.py         # The 5 custom DB tools
+│   │   ├── database.py      # PostgreSQL connection
+│   │   ├── models.py        # SQLAlchemy Schema
+│   │   └── schemas.py       # Pydantic validation
+│   └── requirements.txt
+└── frontend/
+    ├── src/
+    │   ├── components/
+    │   │   ├── Chat.js              # AI Copilot UI & Mock API logic
+    │   │   └── InteractionForm.js   # Read-only Redux form
+    │   ├── store/
+    │   │   ├── store.js
+    │   │   ├── chatSlice.js
+    │   │   └── interactionSlice.js
+    │   ├── App.js
+    │   └── index.js
+    └── package.json
