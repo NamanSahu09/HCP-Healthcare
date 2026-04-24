@@ -3,6 +3,7 @@ import time
 from datetime import datetime
 from typing import Annotated, TypedDict
 from langchain_groq import ChatGroq
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
 from .tools import log_interaction, edit_interaction, suggest_followup, generate_summary_report, analyze_sentiment
@@ -21,13 +22,15 @@ GROQ_KEYS = [
 GROQ_KEYS = [k for k in GROQ_KEYS if k]  # remove None values
 current_key_index = 0
 
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
 def get_llm():
     global current_key_index
     return ChatGroq(
         temperature=0,
-        model_name="llama-3.3-70b-versatile", # YAHAN CHANGE KAREIN! Ya fir "gemma2-9b-it"
+        model_name="llama-3.3-70b-versatile", # You can also use "gemma2-9b-it"
         groq_api_key=GROQ_KEYS[current_key_index % len(GROQ_KEYS)],
-        max_tokens=500, # Tokens thode badha do taaki output na kate
+        max_tokens=500,
     )
 
 tools = [log_interaction, edit_interaction, suggest_followup, generate_summary_report, analyze_sentiment]
@@ -53,21 +56,44 @@ def call_model(state: AgentState):
     }
     full_messages = [system_message] + messages
 
-    for attempt in range(len(GROQ_KEYS) * 2):
+    # Attempt 1: Try with Groq Keys
+    # We use max(1, len) so the loop runs at least once even if GROQ_KEYS is empty
+    for attempt in range(max(1, len(GROQ_KEYS) * 2)):
         try:
+            if not GROQ_KEYS:
+                raise Exception("No Groq keys found.")
             llm = get_llm()
             llm_with_tools = llm.bind_tools(tools)
             response = llm_with_tools.invoke(full_messages)
             return {"messages": [response]}
         except Exception as e:
-            if 'rate_limit_exceeded' in str(e) or '429' in str(e):
-                current_key_index += 1
-                print(f"Rate limit hit. Switching to key {current_key_index % len(GROQ_KEYS) + 1}...")
-                time.sleep(3)
+            if 'rate_limit_exceeded' in str(e).lower() or '429' in str(e):
+                if GROQ_KEYS:
+                    current_key_index += 1
+                    print(f"Groq Rate limit hit. Switching to key {current_key_index % len(GROQ_KEYS) + 1}...")
+                    time.sleep(2)
             else:
-                raise e
+                print(f"Groq encountered an error: {str(e)}")
+                break # If it's not a rate limit (e.g., auth error), break and go to Gemini
 
-    raise Exception("All API keys exhausted. Please wait a minute and try again.")
+    # Attempt 2: Fallback to Gemini if Groq fails
+    # Attempt 2: Fallback to Gemini if Groq fails
+    # Attempt 2: Fallback to Gemini if Groq fails
+    if GEMINI_API_KEY:
+        print("All Groq keys exhausted or failed. Falling back to Gemini 1.5 Flash...")
+        try:
+            gemini_llm = ChatGoogleGenerativeAI(
+                model="gemini-1.5-flash", 
+                temperature=0,
+                google_api_key=GEMINI_API_KEY,
+                max_retries=3
+            )
+            gemini_with_tools = gemini_llm.bind_tools(tools)
+            response = gemini_with_tools.invoke(full_messages)
+            return {"messages": [response]}
+        except Exception as e:
+            raise Exception(f"Groq failed AND Gemini Fallback also failed: {str(e)}")
+
 
 workflow = StateGraph(AgentState)
 workflow.add_node("agent", call_model)

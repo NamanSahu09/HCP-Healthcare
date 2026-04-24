@@ -17,3 +17,4 @@ class HCPInteraction(Base):
     outcomes = Column(Text)
     follow_up_actions = Column(Text)
     follow_up_date = Column(Date, nullable=True)
+    
