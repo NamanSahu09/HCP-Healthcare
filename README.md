@@ -40,6 +40,13 @@ The LangGraph agent acts as the central orchestrator for the CRM. Instead of bas
 
 ## ⚙️ Setup & Installation
 
+### The 1-Click Setup (Recommended)
+To easily install all dependencies for both the frontend and backend, run the setup script from the root directory:
+
+**For Mac/Linux:**
+```bash
+chmod +x setup.sh
+./setup.sh
 ### Prerequisites
 - Node.js (v16+)
 - Python (v3.9+)
