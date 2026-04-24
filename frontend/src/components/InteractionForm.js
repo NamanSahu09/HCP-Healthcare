@@ -2,17 +2,17 @@ import React from 'react';
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { resetForm } from '../store/interactionSlice';
-import { Calendar, Clock, Mic, Search, Plus, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, Mic, CheckCircle, User, Briefcase } from 'lucide-react';
 
 const InteractionForm = () => {
     const formState = useSelector(state => state.form);
     const dispatch = useDispatch();
 
-    const labelStyle = { display: 'block', fontSize: '12.5px', fontWeight: '600', color: '#475569', marginBottom: '6px' };
+    const labelStyle = { display: 'block', fontSize: '11px', fontWeight: '700', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' };
     const inputStyle = {
-        width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1',
-        fontSize: '14px', color: '#1e293b', backgroundColor: '#f8fafc', cursor: 'default', outline: 'none',
-        transition: 'border-color 0.2s', boxSizing: 'border-box'
+        width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0',
+        fontSize: '14px', color: '#1e293b', backgroundColor: '#ffffff', cursor: 'default', outline: 'none',
+        boxSizing: 'border-box', boxShadow: '0 1px 2px rgba(0,0,0,0.01)'
     };
 
     const handleSave = async () => {
@@ -29,97 +29,96 @@ const InteractionForm = () => {
         }
     };
 
-    return (
-        <div style={{ width: '65%', display: 'flex', flexDirection: 'column', backgroundColor: '#f1f5f9', padding: '32px', height: '100vh', overflowY: 'auto', boxSizing: 'border-box' }}>
-            
-            {/* Main Form Card */}
-            <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)', border: '1px solid #e2e8f0', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
-                
-                <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#0f172a', marginBottom: '28px', borderBottom: '1px solid #e2e8f0', paddingBottom: '16px' }}>
-                    Log HCP Interaction
-                </h1>
+    const isFormFilled = formState.hcpName !== '';
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+    return (
+        <div style={{ width: '65%', display: 'flex', flexDirection: 'column', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
+            
+            {/* Scrollable Content */}
+            <div style={{ padding: '40px', overflowY: 'auto', height: '100%', paddingBottom: '100px' }}>
+                
+                <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>Log HCP Interaction</h1>
+                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '36px' }}>Review and synchronize extracted healthcare professional data.</p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
                     
                     {/* Section 1 */}
                     <div>
-                        <h3 style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '16px', textTransform: 'uppercase' }}>Interaction Details</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <h3 style={{ fontSize: '13px', fontWeight: '700', color: '#3b82f6', marginBottom: '20px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Interaction Details</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                             <div>
                                 <label style={labelStyle}>HCP Name</label>
-                                <input readOnly value={formState.hcpName || ''} placeholder="Auto-filled via AI" style={inputStyle} />
+                                <div style={{ position: 'relative' }}>
+                                    <User size={16} style={{ position: 'absolute', left: '14px', top: '14px', color: '#94a3b8' }} />
+                                    <input readOnly value={formState.hcpName || ''} placeholder="E.g. Dr. Jane Doe" style={{...inputStyle, paddingLeft: '40px'}} />
+                                </div>
                             </div>
                             <div>
                                 <label style={labelStyle}>Interaction Type</label>
-                                <select readOnly value={formState.interactionType || 'Meeting'} style={{...inputStyle, appearance: 'none', backgroundColor: '#f8fafc'}}>
-                                    <option value="Meeting">Meeting</option>
-                                    <option value="Call">Call</option>
-                                    <option value="Email">Email</option>
-                                </select>
+                                <div style={{ position: 'relative' }}>
+                                    <Briefcase size={16} style={{ position: 'absolute', left: '14px', top: '14px', color: '#94a3b8' }} />
+                                    <select readOnly value={formState.interactionType || 'Meeting'} style={{...inputStyle, paddingLeft: '40px', appearance: 'none'}}>
+                                        <option value="Meeting">In-Person Meeting</option>
+                                        <option value="Call">Phone Call</option>
+                                        <option value="Email">Email Communication</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                         <div>
                             <label style={labelStyle}>Date</label>
                             <div style={{ position: 'relative' }}>
-                                <input type="text" readOnly value={formState.date || ''} placeholder="MM/DD/YYYY" style={inputStyle} />
-                                <Calendar size={16} style={{ position: 'absolute', right: '12px', top: '12px', color: '#64748b' }} />
+                                <Calendar size={16} style={{ position: 'absolute', left: '14px', top: '14px', color: '#94a3b8' }} />
+                                <input type="text" readOnly value={formState.date || ''} placeholder="MM/DD/YYYY" style={{...inputStyle, paddingLeft: '40px'}} />
                             </div>
                         </div>
                         <div>
                             <label style={labelStyle}>Time</label>
                             <div style={{ position: 'relative' }}>
-                                <input type="text" readOnly value={formState.time || ''} placeholder="HH:MM AM/PM" style={inputStyle} />
-                                <Clock size={16} style={{ position: 'absolute', right: '12px', top: '12px', color: '#64748b' }} />
+                                <Clock size={16} style={{ position: 'absolute', left: '14px', top: '14px', color: '#94a3b8' }} />
+                                <input type="text" readOnly value={formState.time || ''} placeholder="HH:MM AM/PM" style={{...inputStyle, paddingLeft: '40px'}} />
                             </div>
                         </div>
                     </div>
 
                     <div>
                         <label style={labelStyle}>Attendees</label>
-                        <input type="text" readOnly value={formState.attendees || ''} placeholder="Auto-filled via AI" style={inputStyle} />
+                        <input type="text" readOnly value={formState.attendees || ''} placeholder="No attendees mentioned..." style={inputStyle} />
                     </div>
 
                     <div>
                         <label style={labelStyle}>Topics Discussed</label>
-                        <textarea readOnly value={formState.topics || ''} placeholder="Topics will appear here..." style={{ ...inputStyle, height: '90px', resize: 'none' }} />
-                        <button disabled style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', color: '#3b82f6', fontSize: '13px', fontWeight: '500', border: 'none', background: 'none', cursor: 'not-allowed', opacity: 0.8 }}>
-                            <Mic size={14} /> Summarize from Voice Note (Requires Consent)
+                        <textarea readOnly value={formState.topics || ''} style={{ ...inputStyle, height: '100px', resize: 'none' }} />
+                        <button disabled style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '12px', padding: '6px 12px', backgroundColor: '#eff6ff', color: '#3b82f6', borderRadius: '20px', fontSize: '11px', fontWeight: '700', border: '1px solid #bfdbfe', cursor: 'not-allowed', letterSpacing: '0.5px' }}>
+                            <Mic size={14} /> AUTO-SUMMARIZE MODE
                         </button>
                     </div>
 
                     {/* Section 2 */}
-                    <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '28px' }}>
-                        <h3 style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '16px', textTransform: 'uppercase' }}>Materials & Samples</h3>
-                        <div style={{ marginBottom: '20px' }}>
-                            <label style={labelStyle}>Materials Shared</label>
-                            <div style={{ display: 'flex', border: '1px solid #cbd5e1', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f8fafc' }}>
-                                <input readOnly value={formState.materialsShared || ''} placeholder="None" style={{ ...inputStyle, border: 'none', borderRadius: 0, backgroundColor: 'transparent' }} />
-                                <button style={{ padding: '0 16px', backgroundColor: '#f1f5f9', border: 'none', borderLeft: '1px solid #cbd5e1', cursor: 'default', fontSize: '13px', fontWeight: '500', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <Search size={14} /> Search
-                                </button>
+                    <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '32px' }}>
+                        <h3 style={{ fontSize: '13px', fontWeight: '700', color: '#3b82f6', marginBottom: '20px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Resource Distribution</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                            <div>
+                                <label style={labelStyle}>Materials Shared</label>
+                                <input readOnly value={formState.materialsShared || ''} placeholder="None" style={inputStyle} />
                             </div>
-                        </div>
-                        <div>
-                            <label style={labelStyle}>Samples Distributed</label>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', border: '1px solid #cbd5e1', borderRadius: '8px', backgroundColor: '#f8fafc', fontSize: '14px', color: formState.samplesDistributed ? '#1e293b' : '#94a3b8' }}>
-                                <span>{formState.samplesDistributed || "No samples added"}</span>
-                                <button style={{ border: 'none', background: 'none', cursor: 'default', display: 'flex', alignItems: 'center', gap: '4px', color: '#3b82f6', fontSize: '13px', fontWeight: '500' }}>
-                                    <Plus size={14} /> Add Sample
-                                </button>
+                            <div>
+                                <label style={labelStyle}>Samples Distributed</label>
+                                <input readOnly value={formState.samplesDistributed || ''} placeholder="No samples added" style={inputStyle} />
                             </div>
                         </div>
                     </div>
 
                     {/* Section 3 */}
-                    <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '28px' }}>
+                    <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '32px' }}>
                         <label style={labelStyle}>Observed/Inferred HCP Sentiment</label>
-                        <div style={{ display: 'flex', gap: '24px', marginTop: '12px' }}>
+                        <div style={{ display: 'flex', gap: '32px', marginTop: '12px' }}>
                             {['Positive', 'Neutral', 'Negative'].map((sent) => (
-                                <label key={sent} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'default', color: '#334155', fontWeight: '500' }}>
-                                    <input type="radio" readOnly checked={formState.sentiment === sent} style={{ width: '16px', height: '16px', accentColor: '#2563eb' }} /> 
+                                <label key={sent} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'default', color: '#1e293b', fontWeight: '500' }}>
+                                    <input type="radio" readOnly checked={formState.sentiment === sent} style={{ width: '18px', height: '18px', accentColor: '#2563eb' }} /> 
                                     {sent === 'Positive' ? '🤩' : sent === 'Neutral' ? '😐' : '☹️'} {sent}
                                 </label>
                             ))}
@@ -127,25 +126,37 @@ const InteractionForm = () => {
                     </div>
 
                     <div>
-                        <label style={labelStyle}>Outcomes</label>
-                        <textarea readOnly value={formState.outcomes || ''} placeholder="Key outcomes or agreements..." style={{ ...inputStyle, height: '70px', resize: 'none' }} />
+                        <label style={labelStyle}>Outcomes & Next Steps</label>
+                        <textarea readOnly value={formState.outcomes || ''} placeholder="Key outcomes..." style={{ ...inputStyle, height: '80px', resize: 'none' }} />
                     </div>
-
-                    <div style={{ paddingBottom: '16px' }}>
-                        <label style={labelStyle}>Follow-up Actions</label>
-                        <textarea readOnly value={formState.followUpActions || ''} placeholder="Follow-up actions..." style={{ ...inputStyle, height: '70px', resize: 'none' }} />
-                    </div>
-
-                    {/* Submit Button */}
-                    <button
-                        onClick={handleSave}
-                        style={{ padding: '14px', backgroundColor: '#0f172a', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '15px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: 'background-color 0.2s', marginTop: '10px' }}
-                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1e293b'}
-                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#0f172a'}
-                    >
-                        <CheckCircle size={18} /> Save Interaction Record
-                    </button>
                 </div>
+            </div>
+
+            {/* Floating Action Bar */}
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px 40px', background: 'linear-gradient(to top, rgba(255,255,255,1) 60%, rgba(255,255,255,0))', display: 'flex', justifyContent: 'flex-end', pointerEvents: 'none' }}>
+                <button
+                    onClick={handleSave}
+                    disabled={!isFormFilled}
+                    style={{ 
+                        pointerEvents: 'auto',
+                        padding: '14px 28px', 
+                        backgroundColor: isFormFilled ? '#0f172a' : '#cbd5e1', 
+                        color: 'white', 
+                        border: 'none', 
+                        borderRadius: '30px', 
+                        fontWeight: '600', 
+                        cursor: isFormFilled ? 'pointer' : 'not-allowed', 
+                        fontSize: '14px', 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        gap: '8px', 
+                        boxShadow: isFormFilled ? '0 10px 15px -3px rgba(15, 23, 42, 0.3)' : 'none',
+                        transition: 'all 0.3s ease'
+                    }}
+                >
+                    <CheckCircle size={18} /> Finalize & Save Interaction
+                </button>
             </div>
         </div>
     );

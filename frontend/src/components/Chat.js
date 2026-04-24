@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { addMessage, setTyping } from '../store/chatSlice';
 import { updateFormContent } from '../store/interactionSlice';
-import { Bot, Send } from 'lucide-react';
+import { Bot, Send, Sparkles } from 'lucide-react';
 
 const Chat = () => {
     const [input, setInput] = useState('');
@@ -32,7 +32,6 @@ const Chat = () => {
             );
             const data = response.data;
             
-            // Backend se aane wala data populate karein
             if (data.extracted_data && data.extracted_data.doctor_name) {
                 const d = data.extracted_data;
                 let formattedDate = '';
@@ -43,11 +42,8 @@ const Chat = () => {
                 if (!formattedDate) formattedDate = new Date().toLocaleDateString('en-US');
 
                 let formattedTime = '';
-                if (d.time && d.time !== 'None' && d.time !== 'none') {
-                    formattedTime = d.time;
-                } else {
-                    formattedTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                }
+                if (d.time && d.time !== 'None' && d.time !== 'none') formattedTime = d.time;
+                else formattedTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
                 dispatch(updateFormContent({
                     hcpName:            d.doctor_name      || '',
@@ -75,27 +71,19 @@ const Chat = () => {
             dispatch(setTyping(false));
 
         } catch (error) {
-            // FALLBACK LOGIC (Agar backend fail ya delay ho jaye)
             setTimeout(() => {
                 const lowerMsg = userMessage.toLowerCase();
-                const isLogRequest = lowerMsg.includes('met') || lowerMsg.includes('visited') ||
-                                     lowerMsg.includes('discussed') || lowerMsg.includes('called');
-                const isEditRequest = lowerMsg.includes('actually') || lowerMsg.includes('change') ||
-                                      lowerMsg.includes('edit') || lowerMsg.includes('sorry');
+                const isLogRequest = lowerMsg.includes('met') || lowerMsg.includes('visited') || lowerMsg.includes('discussed') || lowerMsg.includes('called');
+                const isEditRequest = lowerMsg.includes('actually') || lowerMsg.includes('change') || lowerMsg.includes('edit') || lowerMsg.includes('sorry');
 
                 if (!isLogRequest && !isEditRequest) {
-                    dispatch(addMessage({
-                        type: 'assistant_error',
-                        content: '❌ Could not connect to the AI backend. Ensure server is running.'
-                    }));
+                    dispatch(addMessage({ type: 'assistant_error', content: '❌ Could not connect to the AI backend. Ensure server is running.' }));
                     dispatch(setTyping(false));
                     return;
                 }
 
-                // SMART EXTRACTION LOGIC
                 const hcpMatch = userMessage.match(/Dr\.?\s+[A-Za-z]+/i);
                 const extractedHcpName = hcpMatch ? hcpMatch[0] : '';
-                
                 const timeMatch = userMessage.match(/(\d{1,2}:\d{2}\s*(?:AM|PM|am|pm))/i);
                 const attendeesMatch = userMessage.match(/Attendees:\s*([^.]+)/i);
                 const outcomesMatch = userMessage.match(/Outcomes:\s*([^.]+)/i);
@@ -103,7 +91,6 @@ const Chat = () => {
                 const samplesMatch = userMessage.match(/(\d+\s*sample\s*(?:packs?)?)/i);
                 const materialsMatch = userMessage.match(/(brochures?)/i);
 
-                // INTERACTION TYPE DETECTION
                 let extractedInteractionType = '';
                 if (lowerMsg.includes('call') || lowerMsg.includes('phone')) extractedInteractionType = 'Call';
                 else if (lowerMsg.includes('email') || lowerMsg.includes('message')) extractedInteractionType = 'Email';
@@ -118,13 +105,11 @@ const Chat = () => {
                 else if (lowerMsg.includes('negative') || lowerMsg.includes('bad')) extractedSentiment = 'Negative';
                 else if (lowerMsg.includes('neutral')) extractedSentiment = 'Neutral';
 
-                // APPLY UPDATES TO REDUX FORM
                 if (isEditRequest) {
                     const updates = {};
                     if (extractedHcpName) updates.hcpName = extractedHcpName;
                     if (extractedSentiment) updates.sentiment = extractedSentiment;
                     if (extractedInteractionType) updates.interactionType = extractedInteractionType;
-                    
                     dispatch(updateFormContent(updates));
                     dispatch(addMessage({ type: 'assistant_success', content: `✅ Interaction edited successfully! I updated the specific fields.` }));
                 } else {
@@ -149,45 +134,53 @@ const Chat = () => {
     };
 
     return (
-        <div style={{ width: '35%', display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#f8fafc', borderLeft: '1px solid #e2e8f0', boxShadow: '-4px 0 15px rgba(0,0,0,0.02)' }}>
+        <div style={{ width: '35%', display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
             
-            {/* Header */}
-            <div style={{ padding: '20px', backgroundColor: 'white', borderBottom: '1px solid #e2e8f0', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', zIndex: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                    <div style={{ backgroundColor: '#eff6ff', padding: '8px', borderRadius: '8px' }}>
-                        <Bot size={22} color="#2563eb" />
+            {/* Premium Header */}
+            <div style={{ background: 'linear-gradient(135deg, #1e40af, #2563eb)', padding: '24px', color: 'white', position: 'relative', overflow: 'hidden' }}>
+                <Sparkles size={120} color="rgba(255,255,255,0.05)" style={{ position: 'absolute', top: '-20px', right: '-20px' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px', position: 'relative' }}>
+                    <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '8px', borderRadius: '10px', backdropFilter: 'blur(5px)' }}>
+                        <Bot size={20} color="white" />
                     </div>
-                    <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', margin: 0 }}>AI Assistant</h2>
+                    <div>
+                        <h2 style={{ fontSize: '20px', fontWeight: 'bold', margin: 0, letterSpacing: '0.5px' }}>AI Sales Copilot</h2>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                            <div style={{ width: '8px', height: '8px', backgroundColor: '#4ade80', borderRadius: '50%', boxShadow: '0 0 8px #4ade80' }}></div>
+                            <span style={{ fontSize: '11px', fontWeight: '600', letterSpacing: '1px', color: '#bfdbfe', textTransform: 'uppercase' }}>Online & Ready</span>
+                        </div>
+                    </div>
                 </div>
-                <p style={{ fontSize: '13px', color: '#64748b', margin: 0, paddingLeft: '44px' }}>Log interaction details instantly via chat</p>
             </div>
 
             {/* Chat Area */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px', backgroundColor: '#f8fafc' }}>
                 {messages.map((m, i) => (
                     <div key={i} style={{ display: 'flex', justifyContent: m.type === 'user' ? 'flex-end' : 'flex-start' }}>
                         <div style={{
-                            maxWidth: '85%', padding: '14px 16px', borderRadius: '16px', fontSize: '13.5px', lineHeight: '1.5',
-                            backgroundColor: m.type === 'system' ? '#e0f2fe'
-                                           : m.type === 'user' ? '#2563eb'
+                            maxWidth: '85%', padding: '14px 18px', borderRadius: '16px', fontSize: '14px', lineHeight: '1.5',
+                            backgroundColor: m.type === 'system' ? 'white'
+                                           : m.type === 'user' ? '#f1f5f9'
                                            : m.type === 'assistant_success' ? '#dcfce7'
                                            : m.type === 'assistant_error' ? '#fee2e2'
                                            : 'white',
-                            color: m.type === 'user' ? 'white' : '#334155',
-                            boxShadow: m.type === 'user' ? '0 4px 6px rgba(37, 99, 235, 0.2)' : '0 2px 5px rgba(0,0,0,0.05)',
+                            color: m.type === 'user' ? '#334155' : '#1e293b',
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.02)',
+                            border: '1px solid',
+                            borderColor: m.type === 'system' ? '#e2e8f0' : 'transparent',
                             borderBottomRightRadius: m.type === 'user' ? '4px' : '16px',
                             borderTopLeftRadius: m.type !== 'user' ? '4px' : '16px',
-                            border: m.type === 'system' || m.type === 'user' ? 'none' : '1px solid #e2e8f0'
                         }}>
+                            {m.type === 'system' && <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>Agentic Workflow</span>}
                             {m.content}
                         </div>
                     </div>
                 ))}
                 {isTyping && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px' }}>
-                        <div style={{ width: '8px', height: '8px', backgroundColor: '#94a3b8', borderRadius: '50%', animation: 'pulse 1.5s infinite' }}></div>
-                        <div style={{ width: '8px', height: '8px', backgroundColor: '#94a3b8', borderRadius: '50%', animation: 'pulse 1.5s infinite 0.2s' }}></div>
-                        <div style={{ width: '8px', height: '8px', backgroundColor: '#94a3b8', borderRadius: '50%', animation: 'pulse 1.5s infinite 0.4s' }}></div>
+                        <div style={{ width: '6px', height: '6px', backgroundColor: '#94a3b8', borderRadius: '50%', animation: 'pulse 1.5s infinite' }}></div>
+                        <div style={{ width: '6px', height: '6px', backgroundColor: '#94a3b8', borderRadius: '50%', animation: 'pulse 1.5s infinite 0.2s' }}></div>
+                        <div style={{ width: '6px', height: '6px', backgroundColor: '#94a3b8', borderRadius: '50%', animation: 'pulse 1.5s infinite 0.4s' }}></div>
                     </div>
                 )}
                 <div ref={scrollRef} />
@@ -195,22 +188,25 @@ const Chat = () => {
 
             {/* Input Area */}
             <div style={{ padding: '20px', backgroundColor: 'white', borderTop: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', backgroundColor: '#f8fafc', padding: '8px', borderRadius: '16px', border: '1px solid #cbd5e1', transition: 'border-color 0.2s' }}>
-                    <textarea
-                        style={{ flex: 1, padding: '8px 12px', backgroundColor: 'transparent', border: 'none', fontSize: '14px', resize: 'none', outline: 'none', minHeight: '44px', color: '#1e293b' }}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#f8fafc', padding: '6px 6px 6px 16px', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
+                    <input
+                        style={{ flex: 1, backgroundColor: 'transparent', border: 'none', fontSize: '14px', outline: 'none', color: '#1e293b' }}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
-                        placeholder="Type interaction details here..."
+                        placeholder="Log details (e.g. 'Met Dr. Smith...')"
                     />
                     <button
                         onClick={handleSend}
-                        style={{ padding: '10px 16px', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', transition: 'background-color 0.2s', boxShadow: '0 2px 4px rgba(37,99,235,0.3)' }}
-                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
-                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+                        style={{ width: '40px', height: '40px', backgroundColor: '#e2e8f0', color: '#64748b', border: 'none', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                        onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#2563eb'; e.currentTarget.style.color = 'white'; }}
+                        onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
                     >
-                        Log <Send size={14} />
+                        <Send size={18} style={{ marginLeft: '2px' }} />
                     </button>
+                </div>
+                <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: '600', color: '#94a3b8', letterSpacing: '0.5px' }}>POWERED BY GROQ (GEMMA 2) & LANGGRAPH AGENTIC FRAMEWORK</span>
                 </div>
             </div>
         </div>
